@@ -55,3 +55,11 @@ class BottomTopEnv(gym.Env):
         # return to initial state
         self.state = Position.BOTTOM.value
         return self.state
+
+    def changeRewards(self, newShape):
+        # redefine actions and rewards
+        self.shape[Position.BOTTOM] = newShape[Position.BOTTOM]
+        self.shape[Position.MIDDLE] = newShape[Position.MIDDLE]
+        self.shape[Position.TOP] = newShape[Position.TOP]
+
+        return self.state
