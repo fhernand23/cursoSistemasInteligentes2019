@@ -43,6 +43,7 @@ def qLearning(env, num_episodes, discount_factor=1.0,
     # A nested dictionary that maps
     # state -> (action -> action-value).
     Q = defaultdict(lambda: np.zeros(env.action_space.n))
+    print("env.action_space.n %s" % env.action_space.n)
 
     # Keeps track of useful statistics
     stats = EpisodeStats(
@@ -55,11 +56,14 @@ def qLearning(env, num_episodes, discount_factor=1.0,
 
     # For every episode
     for ith_episode in range(num_episodes):
+        print("Episode %s" % ith_episode)
+        print(dict(Q))
 
         # Reset the environment and pick the first action
         state = env.reset()
 
         for t in itertools.count():
+            print("---------------")
 
             # get probabilities of all actions from current state
             action_probabilities = policy(state)
@@ -69,9 +73,11 @@ def qLearning(env, num_episodes, discount_factor=1.0,
             action = np.random.choice(np.arange(
                 len(action_probabilities)),
                 p=action_probabilities)
+            print("state " + str(state) + " action " + str(action))
 
             # take action and get reward, transit to next state
             next_state, reward, done, _ = env.step(action)
+            print("next state " + str(next_state) + " reward " + str(reward))
 
             # Update statistics
             stats.episode_rewards[ith_episode] += reward
@@ -79,9 +85,13 @@ def qLearning(env, num_episodes, discount_factor=1.0,
 
             # TD Update
             best_next_action = np.argmax(Q[next_state])
+            print("next best_next_action " + str(best_next_action))
             td_target = reward + discount_factor * Q[next_state][best_next_action]
+            print("td_target " + str(td_target))
             td_delta = td_target - Q[state][action]
+            print("td_delta " + str(td_delta))
             Q[state][action] += alpha * td_delta
+            print("Q[state][action] " + str(Q[state][action]))
 
             # episode terminated if env return Done or after 50 movements
             if (done or t == 50):

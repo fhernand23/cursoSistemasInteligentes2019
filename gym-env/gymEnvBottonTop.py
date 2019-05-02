@@ -45,7 +45,7 @@ class BottomTopEnv(gym.Env):
         # reward based on current state and action
         reward = self.shape[Position(self.state)][action][1]
         # next state based on current state and action
-        self.state = self.shape[Position(self.state)][action][2]
+        self.state = self.shape[Position(self.state)][action][2].value
 
         # this env don't have finish
         done = False
