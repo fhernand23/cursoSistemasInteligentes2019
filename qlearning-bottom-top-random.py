@@ -24,9 +24,10 @@ def createEpsilonRandomPolicy(Q, epsilon, num_actions):
     """
     def policyFunction(state):
         Action_probabilities = np.ones(num_actions, dtype=float) * epsilon / num_actions
-        # get 2nd best action
-        no_best_action = np.argsort(Q[state])[-2]
-        Action_probabilities[no_best_action] += (1.0 - epsilon)
+        # get best action
+        best_action = np.argmax(Q[state])
+        # set probabilities 1-epsilon
+        Action_probabilities[best_action] += (1.0 - epsilon)
         return Action_probabilities
 
     return policyFunction
@@ -117,10 +118,10 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
     return fig1
 
 
-# Train the model 200 times with differents discount factors
-Q1, stats1 = qLearning(env, 200, discount_factor=1.0)
-Q2, stats2 = qLearning(env, 200, discount_factor=0.8)
-Q3, stats3 = qLearning(env, 200, discount_factor=0.6)
+# Train the model 100 times with differents discount factors
+Q1, stats1 = qLearning(env, 100, discount_factor=1.0)
+Q2, stats2 = qLearning(env, 100, discount_factor=0.8)
+Q3, stats3 = qLearning(env, 100, discount_factor=0.6)
 
 # plot important statistics
 plot_episode_stats(stats1)
