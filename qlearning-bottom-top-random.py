@@ -109,6 +109,7 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
     plt.plot(rewards_smoothed)
     plt.xlabel("Episode")
     plt.ylabel("Episode Reward")
+    plt.ylim(0, 20)
     plt.title("Episode Reward over Time".format(smoothing_window))
     if noshow:
         plt.close(fig1)
@@ -119,7 +120,7 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
 
 
 # Train the model 100 times with differents discount factors
-Q1, stats1 = qLearning(env, 100, discount_factor=1.0)
+Q1, stats1 = qLearning(env, 100, discount_factor=0.9)
 Q2, stats2 = qLearning(env, 100, discount_factor=0.8)
 Q3, stats3 = qLearning(env, 100, discount_factor=0.6)
 
