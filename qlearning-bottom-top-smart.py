@@ -2,7 +2,7 @@ import itertools
 import matplotlib.style
 import numpy as np
 import pandas as pd
-from gymEnvBottonTop import BottomTopEnv, Action, Position
+from gymEnvBottonTop import BottomTopEnv
 from matplotlib import pyplot as plt
 from collections import defaultdict, namedtuple
 
@@ -19,15 +19,23 @@ def createEpsilonSmartPolicy(Q, epsilon, num_actions):
     """
     Creates an epsilon-smart policy based on a given Q-function and epsilon.
 
-    Returns a function that takes the state as an input and returns the probabilities
-    for each action in the form of a numpy array of length of the action space(set of possible actions).
+    Returns a function that takes the state & quantity of times that the agent is in te same state
+    as an input and returns the probabilities for each action in the form of a numpy array of
+    length of the action space(set of possible actions).
     """
-    def policyFunction(state):
-        Action_probabilities = np.ones(num_actions, dtype=float) * epsilon / num_actions
+    def policyFunction(state, stateRepeats):
+        # set probabilities 1 - ( epsilon * stateRepeats)
+        # ej. stateRepeats = 0 => 1 - epsilon
+        # ej. stateRepeats = 1 => 1 - (epsilon*2)
+        # ej. stateRepeats = 2 => 1 - (epsilon*3)
+        epsilonModified = epsilon*(stateRepeats+1)
+        # max value of epsilonModified (0.5)
+        if (epsilonModified >= 0.5):
+            epsilonModified = 0.5
+        Action_probabilities = np.ones(num_actions, dtype=float) * epsilonModified / num_actions
         # get best action
         best_action = np.argmax(Q[state])
-        # set probabilities 1-epsilon
-        Action_probabilities[best_action] += (1.0 - epsilon)
+        Action_probabilities[best_action] += (1.0 - epsilonModified)
         return Action_probabilities
 
     return policyFunction
@@ -62,12 +70,14 @@ def qLearning(env, num_episodes, discount_factor=1.0,
 
         # Reset the environment and pick the first action
         state = env.reset()
+        # Counter of moves that remain the agent in the same state
+        stateRepeats = 0
 
         for t in itertools.count():
             print("---------------")
 
             # get probabilities of all actions from current state
-            action_probabilities = policy(state)
+            action_probabilities = policy(state, stateRepeats)
 
             # choose action according to
             # the probability distribution
@@ -98,6 +108,12 @@ def qLearning(env, num_episodes, discount_factor=1.0,
             if (done or t == 50):
                 break
 
+            # if state unchanged => incremante stateRepeats counter
+            # if state changed => reset stateRepeats counter
+            if (state == next_state):
+                stateRepeats += 1
+            else:
+                stateRepeats = 0
             state = next_state
 
     return Q, stats
@@ -118,9 +134,13 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
     return fig1
 
 
-# Train the model 200 times
-Q, stats = qLearning(env, 50, epsilon=0.1)
+# Train the model 100 times with differents discount factors
+Q1, stats1 = qLearning(env, 100, discount_factor=1.0)
+Q2, stats2 = qLearning(env, 100, discount_factor=0.8)
+Q3, stats3 = qLearning(env, 100, discount_factor=0.6)
 
 # plot important statistics
-plot_episode_stats(stats)
+plot_episode_stats(stats1)
+plot_episode_stats(stats2)
+plot_episode_stats(stats3)
 
