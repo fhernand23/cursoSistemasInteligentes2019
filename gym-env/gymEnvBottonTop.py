@@ -3,11 +3,13 @@ from gym import spaces
 from enum import Enum
 from collections import defaultdict
 
+# possible actions
 class Action(Enum):
     REST = 0
     CLIMB = 1
     DOWN = 2
 
+# possible states
 class Position(Enum):
     BOTTOM = 0
     MIDDLE = 1
@@ -45,9 +47,11 @@ class BottomTopEnv(gym.Env):
         # next state based on current state and action
         self.state = self.shape[Position(self.state)][action][2]
 
+        # this env don't have finish
         done = False
         return self.state, reward, done, {}
 
     def reset(self):
-        self.state = Position.BOTTOM
+        # return to initial state
+        self.state = Position.BOTTOM.value
         return self.state

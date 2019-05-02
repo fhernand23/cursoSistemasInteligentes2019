@@ -2,7 +2,7 @@ import itertools
 import matplotlib.style
 import numpy as np
 import pandas as pd
-from gymEnvBottonTop import BottomTopEnv
+from gymEnvBottonTop import BottomTopEnv, Action, Position
 from matplotlib import pyplot as plt
 from collections import defaultdict, namedtuple
 
@@ -14,19 +14,21 @@ EpisodeStats = namedtuple("Stats",["episode_lengths", "episode_rewards"])
 # Create gym environment.
 env = BottomTopEnv()
 
-# Make the $\epsilon$-random policy.
-def createEpsilonRandomPolicy(Q, epsilon, num_actions):
+# Make the $\epsilon$-smart policy.
+def createEpsilonSmartPolicy(Q, epsilon, num_actions):
     """
-    Creates an epsilon-random policy based on a given Q-function and epsilon.
+    Creates an epsilon-smart policy based on a given Q-function and epsilon.
 
     Returns a function that takes the state as an input and returns the probabilities
     for each action in the form of a numpy array of length of the action space(set of possible actions).
     """
     def policyFunction(state):
         Action_probabilities = np.ones(num_actions, dtype=float) * epsilon / num_actions
-        # get 2nd best action
-        no_best_action = np.argsort(Q[state])[-2]
-        Action_probabilities[no_best_action] += (1.0 - epsilon)
+        print(Action_probabilities)
+        best_action = np.argmax(Q[state])
+        print(best_action)
+        Action_probabilities[best_action] += (1.0 - epsilon)
+        print(Action_probabilities[best_action])
         return Action_probabilities
 
     return policyFunction
@@ -42,6 +44,7 @@ def qLearning(env, num_episodes, discount_factor=1.0,
     # Action value function
     # A nested dictionary that maps
     # state -> (action -> action-value).
+    print("action space %s" % env.action_space.n)
     Q = defaultdict(lambda: np.zeros(env.action_space.n))
 
     # Keeps track of useful statistics
@@ -51,10 +54,11 @@ def qLearning(env, num_episodes, discount_factor=1.0,
 
     # Create an epsilon greedy policy function
     # appropriately for environment action space
-    policy = createEpsilonRandomPolicy(Q, epsilon, env.action_space.n)
+    policy = createEpsilonSmartPolicy(Q, epsilon, env.action_space.n)
 
     # For every episode
     for ith_episode in range(num_episodes):
+        print("Episode %s" % ith_episode)
 
         # Reset the environment and pick the first action
         state = env.reset()
@@ -72,6 +76,7 @@ def qLearning(env, num_episodes, discount_factor=1.0,
 
             # take action and get reward, transit to next state
             next_state, reward, done, _ = env.step(action)
+            print("Action %s to %s with reward %s" % (Action(action).name, Position(next_state).name, reward))
 
             # Update statistics
             stats.episode_rewards[ith_episode] += reward
@@ -106,14 +111,9 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
 
     return fig1
 
-
-# Train the model 200 times with differents discount factors
-Q1, stats1 = qLearning(env, 200, discount_factor=1.0)
-Q2, stats2 = qLearning(env, 200, discount_factor=0.8)
-Q3, stats3 = qLearning(env, 200, discount_factor=0.6)
+# Train the model 200 times
+Q, stats = qLearning(env, 50, epsilon=0.1)
 
 # plot important statistics
-plot_episode_stats(stats1)
-plot_episode_stats(stats2)
-plot_episode_stats(stats3)
+plot_episode_stats(stats)
 

@@ -8,6 +8,7 @@ from collections import defaultdict, namedtuple
 
 matplotlib.style.use('ggplot')
 
+# variable used for statistics
 EpisodeStats = namedtuple("Stats",["episode_lengths", "episode_rewards"])
 
 # Create gym environment.
@@ -81,7 +82,7 @@ def qLearning(env, num_episodes, discount_factor=1.0,
             td_delta = td_target - Q[state][action]
             Q[state][action] += alpha * td_delta
 
-            # done is True if episode terminated or 50 movements
+            # episode terminated if env return Done or after 50 movements
             if (done or t == 50):
                 break
 
@@ -104,11 +105,9 @@ def plot_episode_stats(stats, smoothing_window=10, noshow=False):
 
     return fig1
 
-# Train the model 100 times
-print("training model")
-Q, stats = qLearning(env, 100)
+# Train the model 200 times
+Q, stats = qLearning(env, 200)
 
 # plot important statistics
-print("plot stats")
 plot_episode_stats(stats)
 
