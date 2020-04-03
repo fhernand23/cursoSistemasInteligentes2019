@@ -1,3 +1,2 @@
-# Curso Sistemas Inteligentes - TP1
-Curso de Sistemas Inteligentes - Trabajo práctico 1
-
+# Curso Sistemas Inteligentes 2020
+Curso de Sistemas Inteligentes
